@@ -1,0 +1,233 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Sapa Menggunakan AJAX dan PHP</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: white;
+            width: 100%;
+            max-width: 550px;
+            padding: 45px 37px;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.10);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 30px;
+            line-height: 1.15;
+            margin: 15px 0 38px;
+            color: #000;
+        }
+
+        label {
+            display: block;
+            font-size: 18px;
+            margin-bottom: 13px;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 1px solid #d5d5d5;
+            border-radius: 9px;
+            outline: none;
+            margin-bottom: 18px;
+        }
+
+        input:focus {
+            border-color: #087df0;
+        }
+
+        button {
+            display: block;
+            margin: 0 auto;
+            padding: 15px 32px;
+            background-color: #087df0;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 9px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0668cb;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 23px;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        #response {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 7px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        /* Kondisi awal */
+        #response.waiting {
+            background-color: #f0f0f0;
+            color: #666666;
+            border: 1px solid #dddddd;
+        }
+
+        /* Jika nama kosong */
+        #response.error {
+            background-color: #ffe5e5 !important;
+            color: #b42318 !important;
+            border: 1px solid #f5aaaa !important;
+        }
+
+        /* Jika nama terisi */
+        #response.success {
+            background-color: #e3fbe8 !important;
+            color: #237a38 !important;
+            border: 1px solid #9bd6a7 !important;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 22px;
+            }
+
+            h1 {
+                font-size: 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>Form Sapa Menggunakan<br>AJAX dan PHP</h1>
+
+        <form id="formSapa">
+
+            <label for="nama">Masukkan Nama Anda:</label>
+
+            <input
+                type="text"
+                id="nama"
+                name="nama"
+                placeholder="Contoh: Alex"
+            >
+
+            <button type="submit">Kirim</button>
+
+        </form>
+
+        <h2>Respon Server:</h2>
+
+        <div id="response" class="waiting">
+            Menunggu input...
+        </div>
+
+    </div>
+
+    <script>
+        const form = document.getElementById("formSapa");
+        const response = document.getElementById("response");
+        const inputNama = document.getElementById("nama");
+
+        form.addEventListener("submit", function(event) {
+
+            event.preventDefault();
+
+            const nama = inputNama.value.trim();
+
+            const data = new URLSearchParams();
+            data.append("nama", nama);
+
+            response.textContent = "Memproses...";
+            response.className = "waiting";
+
+            fetch("server.php", {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+
+                body: data.toString()
+            })
+
+            .then(function(result) {
+
+                if (!result.ok) {
+                    throw new Error("Server bermasalah");
+                }
+
+                return result.text();
+
+            })
+
+            .then(function(hasil) {
+
+                hasil = hasil.trim();
+
+                response.textContent = hasil;
+
+                if (hasil === "Input nama tidak boleh kosong!") {
+
+                    // Nama kosong: warna merah
+                    response.className = "error";
+
+                } else if (hasil.startsWith("Halo,")) {
+
+                    // Nama terisi: warna hijau
+                    response.className = "success";
+
+                } else {
+
+                    response.className = "error";
+
+                }
+
+            })
+
+            .catch(function(error) {
+
+                response.textContent =
+                    "Terjadi kesalahan koneksi ke server.";
+
+                response.className = "error";
+
+                console.error(error);
+
+            });
+
+        });
+    </script>
+
+</body>
+</html>
